@@ -1,0 +1,9 @@
+localconfig.toml
+__pycache__/
+.venv/
+!build/readme.txt
+build/*
+extracted_assets/*
+release/
+works/
+*.log
