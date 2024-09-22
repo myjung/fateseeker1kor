@@ -10,9 +10,9 @@ pip install openai titoken
 ## 프로젝트 구조
 /build/ : 최종적으로 패치가 완료된 결과물
 
-/data/ : 게임과 관련된 각 데이터들이 들어있는 폴더
+/extracted_assets/ : 게임 원본 데이터
 
-/gulongpatcher : 고룡풍운록 번역에 사용할 파이썬 패키지
+/patcher : 번역에 사용할 코드들
 
 /sampleconfig.toml : 패치 구동환경에 따른 로컬 설정 샘플
 
