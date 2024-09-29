@@ -2,6 +2,8 @@ from dataclasses import dataclass
 import toml as tomllib
 import pathlib
 from shutil import copyfile
+import csv
+import io
 
 import UnityPy
 from UnityPy.enums import ClassIDType
@@ -34,7 +36,7 @@ class FateSeeker1Patcher:
     def __init__(self, extracted_asset_path: pathlib.Path) -> None:
         # copy assets from backupfiles and Load
         copyfile(
-            extracted_asset_path.joinpath("textfile.bak"),
+            extracted_asset_path.joinpath("textfiles.bak"),
             extracted_asset_path.joinpath("textfiles"),
         )
         copyfile(
@@ -73,6 +75,22 @@ class FateSeeker1Patcher:
             f.write(self.textfiles.file.save())
 
 
+
+class FateSeekerCsvParser:
+    def __init__(self, text:str) -> None:
+        self.text = text
+    
+    def change_by_key(self, key_translated:dict) -> list:
+        output = io.StringIO()
+        output.write(",".join(("Key","Chinese","China")))
+        output.write("\r\n")
+        for row in csv.DictReader(self.text.splitlines()):
+            if row['Key'] in key_translated:
+                row['Chinese'] = key_translated[row['Key']]
+            output.write(f"{row['Key']},{row['Chinese']},{row['China']}\r\n")
+        return output.getvalue()
+
+
 class FateSeeker1PatchHelper:
     def __init__(self, patcher: FateSeeker1Patcher) -> None:
         self.patcher = patcher
@@ -81,8 +99,9 @@ class FateSeeker1PatchHelper:
         # extract text assets from asset files
         pass
 
-    def patch(self, input_keywords_path: str, output_path: str) -> None:
+    def patch(self, translated_csv: str, output_path: str) -> None:
         # replace text with translated text
+        self.patcher.set_text("assets/forassetbundles/textfiles/localization.csv", translated_csv)
         pass
 
 
