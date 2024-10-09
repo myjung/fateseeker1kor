@@ -31,6 +31,7 @@ def main():
     )
 
     setting_path = pathlib.Path("localconfig.toml")
+    patcher = FateSeeker1Patcher(setting_path)
     if args.backup:
         # Extract config files
         FateSeeker1Patcher.backup_asset(setting_path)
