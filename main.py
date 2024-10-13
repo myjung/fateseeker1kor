@@ -9,8 +9,19 @@ import toml
 import argparse
 
 # custom packages
-from patcher.extractor import FateSeeker1Patcher, FateSeeker1MetaInfo, FateSeeker1PatchHelper
+from patcher.extractor import FateSeeker1Patcher, FateSeeker1MetaInfo, FateSeeker1PatchHelper, FateSeekerCsvParser
 
+
+def make_korean_string_table(input_file_path:str)->dict:
+    output = dict()
+    with open(input_file_path,"r",encoding="utf8") as f:
+        for line in f:
+            try:
+                id,Key,Chinese,ENGLISH,Old,New, = line.strip().split("\t")
+                output[Key] = New
+            except Exception as e:
+                print(line, e)
+    return output
 
 def main():
     # Create the parser
@@ -31,7 +42,8 @@ def main():
     )
 
     setting_path = pathlib.Path("localconfig.toml")
-    patcher = FateSeeker1Patcher(setting_path)
+    fate_patcher = FateSeeker1Patcher(pathlib.Path(os.path.abspath(".")).joinpath("extracted_assets"))
+    fate_pach_helper = FateSeeker1PatchHelper(fate_patcher)
     if args.backup:
         # Extract config files
         FateSeeker1Patcher.backup_asset(setting_path)
@@ -43,23 +55,28 @@ def main():
 
     if args.patch:
         # # Make patch
-        # patch_helper.patch("./data/translated.csv", "./build/config")
-        # current_time = datetime.now().strftime("%y%m%d%H%M")
-        # zipf = zipfile.ZipFile(f"GulongPatch{current_time}.zip", "w", zipfile.ZIP_DEFLATED)
-        # zipf.write("readme-patchInfo.txt")
+        i = make_korean_string_table("./docs/input.tsv")
+        t = fate_patcher.get_text("assets/forassetbundles/textfiles/localization.csv")
+        fs_localizations = FateSeekerCsvParser(t)
+        output = fs_localizations.change_by_key(i)
+        fate_patcher.set_text("assets/forassetbundles/textfiles/localization.csv", output)
+        fate_patcher.save_asset("./build/texfiles")
+        current_time = datetime.now().strftime("%y%m%d%H%M")
+        zipf = zipfile.ZipFile(f"./release/Fateseeker1Kor_{current_time}.zip", "w", zipfile.ZIP_DEFLATED)
+        zipf.write("readme-patchInfo.txt")
 
         # # ./build 경로의 모든 파일을 /古龙风云录/AssetBundles/ 경로에 추가
-        # for root, dirs, files in os.walk("./build"):
-        #     for file in files:
-        #         # 파일의 전체 경로를 가져옵니다
-        #         full_path = os.path.join(root, file)
-        #         # zip 파일 내의 경로를 설정합니다
-        #         in_zip_path = os.path.join("古龙风云录/AssetBundles", os.path.relpath(full_path, "./build"))
-        #         # 파일을 zip 파일에 추가합니다
-        #         zipf.write(full_path, in_zip_path)
+        for root, dirs, files in os.walk("./build"):
+            for file in files:
+                # 파일의 전체 경로를 가져옵니다
+                full_path = os.path.join(root, file)
+                # zip 파일 내의 경로를 설정합니다
+                in_zip_path = os.path.join("FateSeeker/FateSeeker_Data/StreamingAssets/StandaloneWindows64", os.path.relpath(full_path, "./build"))
+                # 파일을 zip 파일에 추가합니다
+                zipf.write(full_path, in_zip_path)
 
         # # zip 파일을 닫습니다
-        # zipf.close()
+        zipf.close()
         pass
 
     if not args.backup and not args.extract and not args.patch:
