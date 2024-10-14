@@ -17,7 +17,8 @@ def make_korean_string_table(input_file_path:str)->dict:
     with open(input_file_path,"r",encoding="utf8") as f:
         for line in f:
             try:
-                id,Key,Chinese,ENGLISH,Old,New, = line.strip().split("\t")
+                rows = line.strip().split("\t")
+                id,Key,New = rows[0],rows[1],rows[5]
                 output[Key] = New
             except Exception as e:
                 print(line, e)
@@ -60,7 +61,7 @@ def main():
         fs_localizations = FateSeekerCsvParser(t)
         output = fs_localizations.change_by_key(i)
         fate_patcher.set_text("assets/forassetbundles/textfiles/localization.csv", output)
-        fate_patcher.save_asset("./build/texfiles")
+        fate_patcher.save_asset("./build/textfiles")
         current_time = datetime.now().strftime("%y%m%d%H%M")
         zipf = zipfile.ZipFile(f"./release/Fateseeker1Kor_{current_time}.zip", "w", zipfile.ZIP_DEFLATED)
         zipf.write("readme-patchInfo.txt")

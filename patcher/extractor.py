@@ -53,8 +53,9 @@ class FateSeeker1Patcher:
         if not asset.type == ClassIDType.TextAsset:
             raise Exception("Not Text Asset")
         t = ""
+        obj = asset.read()
         try:
-            t = asset.read().text
+            t = obj.m_Script
         except UnicodeDecodeError:
             t = bytes(asset.read().script).decode("big5hkscs")
         if t[:1] == "\ufeff":
@@ -67,7 +68,7 @@ class FateSeeker1Patcher:
         if not asset.type == ClassIDType.TextAsset:
             raise Exception("Not Text Asset")
         data = asset.read()
-        data.script = text.encode("utf-8")
+        data.m_Script = text
         data.save()
 
     def save_asset(self, path: str) -> None:
