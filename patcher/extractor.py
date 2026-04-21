@@ -81,7 +81,7 @@ class FateSeekerCsvParser:
     def __init__(self, text:str) -> None:
         self.text = text
     
-    def change_by_key(self, key_translated:dict) -> list:
+    def change_by_key(self, key_translated:dict) -> str:
         output = io.StringIO()
         output.write(",".join(("Key","Chinese","China")))
         output.write("\r\n")

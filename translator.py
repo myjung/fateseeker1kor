@@ -8,6 +8,8 @@ import anthropic
 import tqdm
 from patcher.translator import Claude3Api
 
+# NOTE: 아래 SDM_/TNPC_ 키 목록은 이전 실행 이력용 참조이며,
+# 현재 실행 시점에는 308번 라인의 'untranslated_*' 목록으로 덮어써집니다.
 dialogue_keys = ['SDM_1104904126#0',
  'SDM_2104023601#0',
  'TNPC_70002451#29',
@@ -330,7 +332,6 @@ dialogue_keys = ['untranslated_0',
  'untranslated_22',
  'untranslated_23',
  'untranslated_24',
- 'untranslated_24',
  'untranslated_25',
  'untranslated_26',
  'untranslated_27',
@@ -431,6 +432,7 @@ def process_key(claude, prompt, first_answer, key):
         logging.info(f"{key} already exists")
         return key, False  # 파일이 이미 존재하므로 처리하지 않음
     logging.info(f"Processing {key}")
+    data = None
     try:
         logging.info(json.dumps(dialogues[key], ensure_ascii=False))
         data = claude.translate(
@@ -446,7 +448,10 @@ def process_key(claude, prompt, first_answer, key):
         return key, True  # 성공적으로 처리됨
     except Exception as e:
         with open(f"./works/{key}.txt", mode="w", encoding="utf-8") as f:
-            f.write(repr(data.content[0].text))
+            if data is not None:
+                f.write(repr(data.content[0].text))
+            else:
+                f.write(repr(e))
         logging.error(f"Error processing {key}: {e}")
         return key, False  # 처리 중 오류 발생
 
